@@ -9,5 +9,26 @@
 import Foundation
 
 class Calculator {
+    enum CalOperator: Int {
+        case none
+        case add
+        case sub
+        case mul
+        case div
+        case sqrt
+        case rev
+    }
+    var lhs: Float
+    var rhs: Float
+    var op: CalOperator
     
+    init() {
+        lhs = 0
+        rhs = 0
+        op = .none
+    }
+    
+    func assignLeftValue(of text: String) {
+        
+    }
 }
