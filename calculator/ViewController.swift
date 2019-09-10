@@ -132,18 +132,17 @@ class ViewController: UIViewController {
         let number = numberFormatter.number(from: rawText) ?? 0
         numberFormatter.positiveFormat = nil
         
-        var processedText = (numberFormatter.string(for: number) ?? "0")
-//        for c in ",.-+" {
-//            processedText = processedText.replacingOccurrences(of: String(c), with: "")
-//        }
-        
-        if processedText.first == "0" {
-            numberFormatter.maximumSignificantDigits = 8
-        } else {
-            numberFormatter.maximumSignificantDigits = 9
+        let processedText = (numberFormatter.string(for: number) ?? "0")
+
+        var leadingZeroCount = 0
+        for digit in processedText {
+            if digit == "0" { leadingZeroCount += 1 }
+            else if digit != "." { break }
         }
         
-        if (number as! Double) >= pow(10.0, Double(maxDisplayDigits)) || (number as! Double) <= pow(0.1, Double(maxDisplayDigits-1))
+        numberFormatter.maximumSignificantDigits = maxDisplayDigits - leadingZeroCount
+        
+        if abs(number as! Double) >= pow(10.0, Double(maxDisplayDigits)) || ( abs(number as! Double) <= pow(0.1, Double(maxDisplayDigits-1)) && number != 0 )
         {
             numberFormatter.exponentSymbol = "e"
             numberFormatter.positiveFormat = "0.#E+0"
