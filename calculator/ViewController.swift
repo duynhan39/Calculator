@@ -12,6 +12,7 @@ import Foundation
 
 class ViewController: UIViewController {
     
+    // View variables
     var zeroLabel : UILabel?
     @IBOutlet var roundedEdgeButtons: [UIButton]!
     @IBOutlet weak var LastRowOfButton: UIStackView!
@@ -20,17 +21,24 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var screenOutputLabel: UILabel!
     
-
     let numberFontToButtonHeight: CGFloat = 0.3
     let operatorFontToButtonHeight: CGFloat = 0.5
     let outputFontToButtonHeight: CGFloat = 1
     
+    let numberFormatter = NumberFormatter()
     
     let fontName = "System Font"
     let maxDisplayDigits = 9
     
+    // Model Variables
+    let calculator = Calculator()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        numberFormatter.numberStyle = .decimal
+        
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -41,14 +49,14 @@ class ViewController: UIViewController {
             button.setBackgroundColor(color: #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1), forState: UIControl.State.highlighted)
         }
         
+        // Math Func Primary Buttons + Opertator Buttons
+        for button in MathFuncPrimaryButtons + operatorButtons {
+            button.setBackgroundColor(color: #colorLiteral(red: 0.9686274529, green: 0.78039217, blue: 0.3450980484, alpha: 1), forState: UIControl.State.highlighted)
+        }
+        
         // Operator Buttons
         for button in operatorButtons {
             button.titleLabel?.font = UIFont(name: fontName, size: button.frame.height*operatorFontToButtonHeight)
-        }
-        
-        // Math Func Primary Buttons
-        for button in MathFuncPrimaryButtons + operatorButtons {
-            button.setBackgroundColor(color: #colorLiteral(red: 0.9686274529, green: 0.78039217, blue: 0.3450980484, alpha: 1), forState: UIControl.State.highlighted)
         }
         
         zeroLabel = UILabel(frame: CGRect(x: 0, y: 0, width: LastRowOfButton.frame.height, height: LastRowOfButton.frame.height) )
@@ -71,15 +79,26 @@ class ViewController: UIViewController {
     func resetInputBuffer() {
         isDisplayInt = true
         screenOutputLabel.text = "0"
+        continuousEqual = false
     }
     
     @IBAction func AC_CButton(_ sender: Any) {
         resetInputBuffer()
+        calculator.reset()
     }
     
+    var isBuffering = false
     @IBAction func pressDigitButton(_ sender: UIButton) {
-        let digit : String = sender.title(for: .normal) ?? "0"
+        if continuousEqual {
+            calculator.reset()
+            continuousEqual = false
+        }
         
+        let digit : String = sender.title(for: .normal) ?? "0"
+        if !isBuffering {
+            resetInputBuffer()
+            isBuffering = true
+        }
         screenOutputLabel.text = appendDigit(to: screenOutputLabel.text ?? "", with: digit)
     }
     
@@ -109,36 +128,127 @@ class ViewController: UIViewController {
     }
     
     func formatDisplayText(of rawText: String) -> String {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = .decimal
-        numberFormatter.maximumSignificantDigits =  9
         
-        var processedText = rawText.replacingOccurrences(of:",", with: "")
-        processedText = processedText.replacingOccurrences(of:".", with: "")
-        processedText = processedText.replacingOccurrences(of:"-", with: "")
+        let number = numberFormatter.number(from: rawText) ?? 0
+        numberFormatter.positiveFormat = nil
         
-        if processedText.first == "0"{
+        var processedText = (numberFormatter.string(for: number) ?? "0")
+//        for c in ",.-+" {
+//            processedText = processedText.replacingOccurrences(of: String(c), with: "")
+//        }
+        
+        if processedText.first == "0" {
             numberFormatter.maximumSignificantDigits = 8
+        } else {
+            numberFormatter.maximumSignificantDigits = 9
         }
         
-        let number = numberFormatter.number(from: processedText) ?? 0
-        
-        if processedText.count > maxDisplayDigits {
+        if (number as! Double) >= pow(10.0, Double(maxDisplayDigits)) || (number as! Double) <= pow(0.1, Double(maxDisplayDigits-1))
+        {
             numberFormatter.exponentSymbol = "e"
             numberFormatter.positiveFormat = "0.#E+0"
             var stringVal = numberFormatter.string(for: number) ?? "0"
             stringVal = stringVal.components(separatedBy: "e").last ?? "0"
             numberFormatter.positiveFormat = "0." + "#"*(maxDisplayDigits-2-stringVal.count) + "E+0"
-
         }
         
-        return numberFormatter.string(for: number) ?? "0"
+        return (numberFormatter.string(for: number) ?? "0").replacingOccurrences(of:"+", with: "")
     }
+    
+    @IBAction func pressDualOperator(_ sender: UIButton) {
+        continuousEqual = false
+        if isBuffering {
+            performOperation()
+        }
+        
+        let op = convertOperatorFrom(title: sender.title(for: .normal))
+        calculator.assignOperator(with: op)
+    }
+    
+    
+    var continuousEqual = false
+    @IBAction func pressEqualButton(_ sender: Any) {
+        performOperation()
+        continuousEqual = true
+    }
+    
+    private func performOperation() {
+        if !continuousEqual {
+            let rhs = (screenOutputLabel.text ?? "")
+            calculator.assignRHS(with: rhs)
+        }
+        isBuffering = false
+        
+        var disPlayText: String
+        if let result: Double = calculator.performTwoOperandsOperation() {
+            disPlayText = formatDisplayText(of: String(result))
+        } else {
+            disPlayText = "Error"
+        }
+        
+        screenOutputLabel.text = disPlayText
+    }
+    
+    @IBAction func pressSingleOperator(_ sender: UIButton) {
+        isBuffering = false
+        
+        let value = (screenOutputLabel.text ?? "")
+        let op = convertOperatorFrom(title: sender.title(for: .normal))
+        
+        var disPlayText: String
+        if let result: Double = calculator.performOneOperandOperation(on: value, with: op) {
+            disPlayText = formatDisplayText(of: String(result))
+        } else {
+            disPlayText = "Error"
+        }
+        
+        screenOutputLabel.text = disPlayText
+    }
+    
+    
+    
+    private func convertOperatorFrom(title op: String?) -> Calculator.CalOperator {
+        switch op {
+        case "+":
+            return .add
+        case "-":
+            return .sub
+        case "×":
+            return .mul
+        case "÷":
+            return .div
+        case "+/-":
+            return .rev
+        case "1/x":
+            return .inv
+        case "√":
+            return .sqrt
+        case "sin":
+            return .sin
+        case "cos":
+            return .cos
+        case "tan":
+            return .tan
+        default:
+            return .none
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
 
 extension UIButton {
     func setBackgroundColor(color: UIColor, forState: UIControl.State) {
-        self.clipsToBounds = true  // add this to maintain corner radius
+        self.clipsToBounds = true
         UIGraphicsBeginImageContext(CGSize(width: 1, height: 1))
         if let context = UIGraphicsGetCurrentContext() {
             context.setFillColor(color.cgColor)
