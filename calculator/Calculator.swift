@@ -68,7 +68,7 @@ class Calculator {
             print("EX: \(mathExpression)")
             print(result)
             
-            if result?.isNormal ?? false {
+            if result?.isNormal ?? false || result?.isZero ?? false {
                 return result
             }
         }
