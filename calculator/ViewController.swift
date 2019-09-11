@@ -38,7 +38,7 @@ class ViewController: UIViewController {
         
         numberFormatter.numberStyle = .decimal
         
-        
+        resetInputBuffer()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -75,9 +75,11 @@ class ViewController: UIViewController {
     }
     
     var isDisplayInt = true
+    var isBuffering = true
     
     func resetInputBuffer() {
         isDisplayInt = true
+        isBuffering = true
         screenOutputLabel.text = "0"
         continuousEqual = false
     }
@@ -87,7 +89,6 @@ class ViewController: UIViewController {
         calculator.reset()
     }
     
-    var isBuffering = false
     @IBAction func pressDigitButton(_ sender: UIButton) {
         if continuousEqual {
             calculator.reset()
@@ -167,8 +168,10 @@ class ViewController: UIViewController {
     
     var continuousEqual = false
     @IBAction func pressEqualButton(_ sender: Any) {
-        performOperation()
-        continuousEqual = true
+        if !calculator.isOpNone() {
+            performOperation()
+            continuousEqual = true
+        }
     }
     
     private func performOperation() {
@@ -193,6 +196,19 @@ class ViewController: UIViewController {
         
         let value = (screenOutputLabel.text ?? "")
         let op = convertOperatorFrom(title: sender.title(for: .normal))
+        
+        if op == .rev {
+            isBuffering = true
+            
+            let text :String = screenOutputLabel.text!
+            if text.count > 1 && text.first ?? " " == "-" {
+                let charIndex = text.index(text.startIndex, offsetBy: 1)
+                screenOutputLabel.text = String(text[charIndex...])
+            } else {
+                screenOutputLabel.text = "-"+text
+            }
+            return
+        }
         
         var disPlayText: String
         if let result: Double = calculator.performOneOperandOperation(on: value, with: op) {

@@ -26,22 +26,24 @@ class Calculator {
 //    var operands = [Float]()
 //    var operators = [CalOperator]()
     
-    var lhs = ""
-    var rhs = ""
-    var op = CalOperator.none
+    private var lhs = ""
+    private var rhs = ""
+    private var op = CalOperator.none
+    
+    func isOpNone() -> Bool {
+        return op == .none
+    }
     
     func reset() {
         lhs = ""
         rhs = ""
         op = CalOperator.none
-        
-        print("RESET")
     }
     
     private func filterStringNumber(of str: String) -> String {
         var filteredStr = str.replacingOccurrences(of:",", with: "")
         if (filteredStr.last ?? " ") == "." {
-            filteredStr.replacingOccurrences(of:".", with: "")
+            filteredStr = filteredStr.replacingOccurrences(of:".", with: "")
         }
         return filteredStr
     }
@@ -62,10 +64,11 @@ class Calculator {
         let mathExpression: String = str
         let exp: NSExpression = NSExpression(format: mathExpression)
         
+        print(exp)
+        
         if str.first ?? " " != "E" {
             let result: Double? = exp.expressionValue(with: nil, context: nil) as! Double?
             
-            print("EX: \(mathExpression)")
             print(result)
             
             if result?.isNormal ?? false || result?.isZero ?? false {

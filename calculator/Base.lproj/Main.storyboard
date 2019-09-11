@@ -29,7 +29,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="84" height="84"/>
                                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" secondItem="0Qf-t2-Icd" secondAttribute="height" multiplier="1:1" id="VwJ-la-mck"/>
+                                                    <constraint firstAttribute="width" secondItem="0Qf-t2-Icd" secondAttribute="height" multiplier="1:1" priority="750" id="VwJ-la-mck"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" name="CourierNewPSMT" family="Courier New" pointSize="17"/>
                                                 <state key="normal" title="AC">
@@ -48,7 +48,7 @@
                                                 <rect key="frame" x="92" y="0.0" width="83.5" height="84"/>
                                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" secondItem="Vyx-Ba-aAo" secondAttribute="height" multiplier="1:1" id="66e-pQ-Ytw"/>
+                                                    <constraint firstAttribute="width" secondItem="Vyx-Ba-aAo" secondAttribute="height" multiplier="1:1" priority="750" id="66e-pQ-Ytw"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" name="CourierNewPSMT" family="Courier New" pointSize="17"/>
                                                 <state key="normal" title="+/-">
@@ -62,7 +62,7 @@
                                                 <rect key="frame" x="183.5" y="0.0" width="84" height="84"/>
                                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" secondItem="6ee-az-155" secondAttribute="height" multiplier="1:1" id="u4r-H1-csW"/>
+                                                    <constraint firstAttribute="width" secondItem="6ee-az-155" secondAttribute="height" multiplier="1:1" priority="750" id="u4r-H1-csW"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" name="CourierNewPSMT" family="Courier New" pointSize="17"/>
                                                 <state key="normal" title="1/x">
@@ -76,7 +76,7 @@
                                                 <rect key="frame" x="275.5" y="0.0" width="83.5" height="84"/>
                                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" secondItem="qYf-Ij-hxx" secondAttribute="height" multiplier="1:1" id="ZS3-li-cmO"/>
+                                                    <constraint firstAttribute="width" secondItem="qYf-Ij-hxx" secondAttribute="height" multiplier="1:1" priority="750" id="ZS3-li-cmO"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" name="CourierNewPSMT" family="Courier New" pointSize="17"/>
                                                 <state key="normal" title="√">
@@ -405,8 +405,8 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2W6-J9-Qgr">
-                                <rect key="frame" x="8" y="88" width="359" height="20.5"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2W6-J9-Qgr">
+                                <rect key="frame" x="8" y="34" width="359" height="75"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -416,6 +416,7 @@
                         <constraints>
                             <constraint firstItem="VFz-Vj-rJG" firstAttribute="top" secondItem="2W6-J9-Qgr" secondAttribute="bottom" constant="8" symbolic="YES" id="0LR-or-oHp"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="VFz-Vj-rJG" secondAttribute="trailing" constant="8" id="7TQ-CP-ABw"/>
+                            <constraint firstItem="2W6-J9-Qgr" firstAttribute="top" relation="greaterThanOrEqual" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="8" id="9zt-ad-h4z"/>
                             <constraint firstItem="VFz-Vj-rJG" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" constant="-8" id="bcp-dI-M7z"/>
                             <constraint firstItem="2W6-J9-Qgr" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="8" id="cAo-FT-bYg"/>
                             <constraint firstItem="VFz-Vj-rJG" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="8" id="lnE-KV-Vwe"/>
@@ -462,7 +463,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="134.78260869565219" y="97.767857142857139"/>
+            <point key="canvasLocation" x="133.59999999999999" y="97.601199400299862"/>
         </scene>
     </scenes>
 </document>
