@@ -17,7 +17,7 @@ class ViewController: UIViewController {
     @IBOutlet var roundedEdgeButtons: [UIButton]!
     @IBOutlet weak var LastRowOfButton: UIStackView!
     @IBOutlet var operatorButtons: [UIButton]!
-    @IBOutlet var MathFuncPrimaryButtons: [UIButton]!
+    @IBOutlet var mathFuncPrimaryButtons: [UIButton]!
     
     @IBOutlet weak var screenOutputLabel: UILabel!
     
@@ -37,41 +37,57 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         numberFormatter.numberStyle = .decimal
-        
         resetInputBuffer()
+        
+        zeroLabel = UILabel()
+        LastRowOfButton.addSubview(zeroLabel!)
+        
+        screenOutputLabel.text = "0"
+        screenOutputLabel.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        screenOutputLabel.adjustsFontSizeToFitWidth = true
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        draw()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        // Number Buttons
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: nil, completion: { _ in self.draw()})
+        draw()
+    }
+    
+    private func draw() {
+        // All Buttons
+        screenOutputLabel.font = UIFont(name: fontName, size: LastRowOfButton.frame.height*outputFontToButtonHeight)
+        
+        let aButton = mathFuncPrimaryButtons[0]
+        var cornerRadius = aButton.frame.height*0.5
+        if aButton.frame.height != aButton.frame.width {
+            cornerRadius = aButton.frame.height*0.1
+        }
+        
         for button in roundedEdgeButtons {
-            button.layer.cornerRadius = button.frame.height*0.5
+            button.layer.cornerRadius = cornerRadius
             button.titleLabel?.font = UIFont(name: fontName, size: button.frame.height*numberFontToButtonHeight)
             button.setBackgroundColor(color: #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1), forState: UIControl.State.highlighted)
         }
         
         // Math Func Primary Buttons + Opertator Buttons
-        for button in MathFuncPrimaryButtons + operatorButtons {
+        for button in mathFuncPrimaryButtons + operatorButtons {
             button.setBackgroundColor(color: #colorLiteral(red: 0.9686274529, green: 0.78039217, blue: 0.3450980484, alpha: 1), forState: UIControl.State.highlighted)
         }
         
         // Operator Buttons
         for button in operatorButtons {
-            button.titleLabel?.font = UIFont(name: fontName, size: button.frame.height*operatorFontToButtonHeight)
+            button.titleLabel?.font = UIFont(name: fontName, size: aButton.frame.height*operatorFontToButtonHeight)
         }
         
-        zeroLabel = UILabel(frame: CGRect(x: 0, y: 0, width: LastRowOfButton.frame.height, height: LastRowOfButton.frame.height) )
+        zeroLabel?.frame = CGRect(x: 0, y: 0, width: aButton.frame.width, height: aButton.frame.height)
         zeroLabel?.text = "0"
-        zeroLabel?.font = UIFont(name: fontName, size: LastRowOfButton.frame.height*numberFontToButtonHeight)
+        zeroLabel?.font = UIFont(name: fontName, size: aButton.frame.height*numberFontToButtonHeight)
         zeroLabel?.textAlignment = .center
         zeroLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-        
-        LastRowOfButton.addSubview(zeroLabel!)
-        
-        screenOutputLabel.font = UIFont(name: fontName, size: LastRowOfButton.frame.height*outputFontToButtonHeight)
-        screenOutputLabel.text = "0"
-        screenOutputLabel.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-        
-        screenOutputLabel.adjustsFontSizeToFitWidth = true
     }
     
     var isDisplayInt = true
@@ -90,6 +106,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func pressDigitButton(_ sender: UIButton) {
+        
         if continuousEqual {
             calculator.reset()
             continuousEqual = false
