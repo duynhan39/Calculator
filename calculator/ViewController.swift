@@ -18,12 +18,18 @@ class ViewController: UIViewController {
     @IBOutlet weak var LastRowOfButton: UIStackView!
     @IBOutlet var operatorButtons: [UIButton]!
     @IBOutlet var mathFuncPrimaryButtons: [UIButton]!
+    @IBOutlet var topRowButtons: [UIButton]!
+    
+    
+    @IBOutlet weak var AC_CButton: UIButton!
     
     @IBOutlet weak var screenOutputLabel: UILabel!
     
-    let numberFontToButtonHeight: CGFloat = 0.3
+    let numberFontToButtonHeight: CGFloat = 0.4
+    let mathFuncFontToButtonHeight: CGFloat = 0.3
     let operatorFontToButtonHeight: CGFloat = 0.5
     let outputFontToButtonHeight: CGFloat = 1
+    
     
     let numberFormatter = NumberFormatter()
     
@@ -45,6 +51,22 @@ class ViewController: UIViewController {
         screenOutputLabel.text = "0"
         screenOutputLabel.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         screenOutputLabel.adjustsFontSizeToFitWidth = true
+        
+        for button in roundedEdgeButtons {
+            button.setBackgroundColor(color: #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1), forState: UIControl.State.highlighted)
+        }
+        
+        // Math Func Primary Buttons + Opertator Buttons
+        for button in mathFuncPrimaryButtons + operatorButtons {
+            button.setBackgroundColor(color: #colorLiteral(red: 0.9686274529, green: 0.78039217, blue: 0.3450980484, alpha: 1), forState: UIControl.State.highlighted)
+            button.setBackgroundColor(color: #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1), forState: UIControl.State.selected)
+            button.setTitleColor(#colorLiteral(red: 1, green: 0.5781051517, blue: 0, alpha: 1), for: .selected)
+            button.setTitleColor(#colorLiteral(red: 1, green: 1, blue: 1, alpha: 1), for: .normal)
+        }
+        
+        zeroLabel?.text = "0"
+        zeroLabel?.textAlignment = .center
+        zeroLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -53,15 +75,16 @@ class ViewController: UIViewController {
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate(alongsideTransition: nil, completion: { _ in self.draw()})
-        draw()
+        coordinator.animate(alongsideTransition: nil, completion: { _ in
+            self.draw()
+        })
     }
     
     private func draw() {
-        // All Buttons
-        screenOutputLabel.font = UIFont(name: fontName, size: LastRowOfButton.frame.height*outputFontToButtonHeight)
-        
         let aButton = mathFuncPrimaryButtons[0]
+        screenOutputLabel.font = UIFont(name: fontName, size: aButton.frame.height*outputFontToButtonHeight)
+        
+        // All Buttons
         var cornerRadius = aButton.frame.height*0.5
         if aButton.frame.height != aButton.frame.width {
             cornerRadius = aButton.frame.height*0.1
@@ -70,12 +93,10 @@ class ViewController: UIViewController {
         for button in roundedEdgeButtons {
             button.layer.cornerRadius = cornerRadius
             button.titleLabel?.font = UIFont(name: fontName, size: button.frame.height*numberFontToButtonHeight)
-            button.setBackgroundColor(color: #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1), forState: UIControl.State.highlighted)
         }
         
-        // Math Func Primary Buttons + Opertator Buttons
-        for button in mathFuncPrimaryButtons + operatorButtons {
-            button.setBackgroundColor(color: #colorLiteral(red: 0.9686274529, green: 0.78039217, blue: 0.3450980484, alpha: 1), forState: UIControl.State.highlighted)
+        for button in mathFuncPrimaryButtons + topRowButtons {
+            button.titleLabel?.font = UIFont(name: fontName, size: button.frame.height*mathFuncFontToButtonHeight)
         }
         
         // Operator Buttons
@@ -84,28 +105,50 @@ class ViewController: UIViewController {
         }
         
         zeroLabel?.frame = CGRect(x: 0, y: 0, width: aButton.frame.width, height: aButton.frame.height)
-        zeroLabel?.text = "0"
         zeroLabel?.font = UIFont(name: fontName, size: aButton.frame.height*numberFontToButtonHeight)
-        zeroLabel?.textAlignment = .center
-        zeroLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
     }
     
     var isDisplayInt = true
     var isBuffering = true
+    var isAC = true {
+        didSet {
+//            setAC_CLable()
+        }
+    }
+    
+    func setAC_CLable() {
+        if isAC {
+            AC_CButton.titleLabel?.text = "AC"
+        } else {
+            AC_CButton.titleLabel?.text = "C"
+        }
+    }
     
     func resetInputBuffer() {
         isDisplayInt = true
         isBuffering = true
-        screenOutputLabel.text = "0"
         continuousEqual = false
+        screenOutputLabel.text = "0"
     }
     
     @IBAction func AC_CButton(_ sender: Any) {
         resetInputBuffer()
-        calculator.reset()
+        if isAC {
+            calculator.reset()
+            prevButton?.isSelected = false
+            prevButton = nil
+        } else {
+            prevButton!.isSelected = true
+            isAC = true
+        }
     }
     
     @IBAction func pressDigitButton(_ sender: UIButton) {
+        if isAC {
+            isAC = false
+        }
+        
+        prevButton?.isSelected = false
         
         if continuousEqual {
             calculator.reset()
@@ -172,7 +215,13 @@ class ViewController: UIViewController {
         return (numberFormatter.string(for: number) ?? "0").replacingOccurrences(of:"+", with: "")
     }
     
+    var prevButton: UIButton? = nil
     @IBAction func pressDualOperator(_ sender: UIButton) {
+        
+        prevButton?.isSelected = false
+        prevButton = sender
+        sender.isSelected = true
+        
         continuousEqual = false
         if isBuffering {
             performOperation()
@@ -189,6 +238,10 @@ class ViewController: UIViewController {
             performOperation()
             continuousEqual = true
         }
+        
+        prevButton?.isSelected = false
+        
+        prevButton?.isSelected = false
     }
     
     private func performOperation() {

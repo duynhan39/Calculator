@@ -64,12 +64,12 @@ class Calculator {
         let mathExpression: String = str
         let exp: NSExpression = NSExpression(format: mathExpression)
         
-        print(exp)
+//        print(exp)
         
         if str.first ?? " " != "E" {
             let result: Double? = exp.expressionValue(with: nil, context: nil) as! Double?
             
-            print(result)
+//            print(result)
             
             if result?.isNormal ?? false || result?.isZero ?? false {
                 return result
