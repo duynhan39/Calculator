@@ -1,6 +1,7 @@
 # Calculator
-
+<p align="center">
 <img src="./calculator/calculator.svg" width="350">
+</p>
 
 Remake apple calculator
 
@@ -10,8 +11,9 @@ Clone the project to where you want to have it on your local machine and run it 
 
 
 ## Quick Look
-
+<p align="center">
 <img src="./ss/cal.png" width="350">
+</p>
 
 ## Versions
 
