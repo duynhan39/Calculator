@@ -13,40 +13,35 @@ import Foundation
 class ViewController: UIViewController {
     
     // View variables
-    var zeroLabel : UILabel?
-    @IBOutlet var roundedEdgeButtons: [UIButton]!
-    @IBOutlet weak var LastRowOfButton: UIStackView!
-    @IBOutlet var operatorButtons: [UIButton]!
-    @IBOutlet var mathFuncPrimaryButtons: [UIButton]!
-    @IBOutlet var topRowButtons: [UIButton]!
+    private var zeroLabel : UILabel?
+    @IBOutlet private var roundedEdgeButtons: [UIButton]!
+    @IBOutlet private weak var LastRowOfButton: UIStackView!
+    @IBOutlet private var operatorButtons: [UIButton]!
+    @IBOutlet private var mathFuncPrimaryButtons: [UIButton]!
+    @IBOutlet private var topRowButtons: [UIButton]!
     
+    @IBOutlet private weak var AC_CButton: UIButton!
     
-    @IBOutlet weak var AC_CButton: UIButton!
+    @IBOutlet private weak var screenOutputLabel: UILabel!
     
-    @IBOutlet weak var screenOutputLabel: UILabel!
+    private let numberFontToButtonHeight: CGFloat = 0.4
+    private let mathFuncFontToButtonHeight: CGFloat = 0.3
+    private let operatorFontToButtonHeight: CGFloat = 0.5
+    private let outputFontToButtonHeight: CGFloat = 1
     
-    let numberFontToButtonHeight: CGFloat = 0.4
-    let mathFuncFontToButtonHeight: CGFloat = 0.3
-    let operatorFontToButtonHeight: CGFloat = 0.5
-    let outputFontToButtonHeight: CGFloat = 1
+    private let numberFormatter = NumberFormatter()
     
-    
-    let numberFormatter = NumberFormatter()
-    
-    let fontName = "System Font"
-    let maxDisplayDigits = 9
+    private let fontName = "System Font"
+    private let maxDisplayDigits = 9
     
     // Model Variables
-    let calculator = Calculator()
+    private let calculator = Calculator()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        numberFormatter.numberStyle = .decimal
         resetInputBuffer()
-        
-        zeroLabel = UILabel()
-        LastRowOfButton.addSubview(zeroLabel!)
+        numberFormatter.numberStyle = .decimal
         
         screenOutputLabel.text = "0"
         screenOutputLabel.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
@@ -55,8 +50,7 @@ class ViewController: UIViewController {
         for button in roundedEdgeButtons {
             button.setBackgroundColor(color: #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1), forState: UIControl.State.highlighted)
         }
-        
-        // Math Func Primary Buttons + Opertator Buttons
+    
         for button in mathFuncPrimaryButtons + operatorButtons {
             button.setBackgroundColor(color: #colorLiteral(red: 0.9686274529, green: 0.78039217, blue: 0.3450980484, alpha: 1), forState: UIControl.State.highlighted)
             button.setBackgroundColor(color: #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1), forState: UIControl.State.selected)
@@ -64,9 +58,13 @@ class ViewController: UIViewController {
             button.setTitleColor(#colorLiteral(red: 1, green: 1, blue: 1, alpha: 1), for: .normal)
         }
         
+        zeroLabel = UILabel()
         zeroLabel?.text = "0"
         zeroLabel?.textAlignment = .center
         zeroLabel?.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+        LastRowOfButton.addSubview(zeroLabel!)
+        
+        AC_CButton.setTitle("C", for: .selected)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -108,23 +106,18 @@ class ViewController: UIViewController {
         zeroLabel?.font = UIFont(name: fontName, size: aButton.frame.height*numberFontToButtonHeight)
     }
     
-    var isDisplayInt = true
-    var isBuffering = true
-    var isAC = true {
-        didSet {
-//            setAC_CLable()
-        }
+    private var isDisplayInt = true
+    private var isBuffering = true
+    private var isSelectingOperator = false
+    private var isAC = true {
+        didSet { AC_CButton.isSelected = !isAC }
     }
     
-    func setAC_CLable() {
-        if isAC {
-            AC_CButton.titleLabel?.text = "AC"
-        } else {
-            AC_CButton.titleLabel?.text = "C"
-        }
-    }
+//    func setAC_CLable() {
+//        AC_CButton.isSelected = !isAC
+//    }
     
-    func resetInputBuffer() {
+    private func resetInputBuffer() {
         isDisplayInt = true
         isBuffering = true
         continuousEqual = false
@@ -135,20 +128,17 @@ class ViewController: UIViewController {
         resetInputBuffer()
         if isAC {
             calculator.reset()
-            prevButton?.isSelected = false
-            prevButton = nil
+            setPrevOperatorButton(to: nil)
         } else {
-            prevButton!.isSelected = true
+            setPrevOperatorButton(to: true)
             isAC = true
         }
     }
     
     @IBAction func pressDigitButton(_ sender: UIButton) {
-        if isAC {
-            isAC = false
-        }
+        isAC = false
         
-        prevButton?.isSelected = false
+        setPrevOperatorButton(to: false)
         
         if continuousEqual {
             calculator.reset()
@@ -160,10 +150,11 @@ class ViewController: UIViewController {
             resetInputBuffer()
             isBuffering = true
         }
+        
         screenOutputLabel.text = appendDigit(to: screenOutputLabel.text ?? "", with: digit)
     }
     
-    func appendDigit(to currentText: String, with tail: String) -> String {
+    private func appendDigit(to currentText: String, with tail: String) -> String {
         var decimalCount = 1
         if isDisplayInt { decimalCount = 0 }
         let processedText = currentText.replacingOccurrences(of:",", with: "")
@@ -174,27 +165,18 @@ class ViewController: UIViewController {
             if isDisplayInt {
                 isDisplayInt = false
                 return currentText + tail
-            }
-            else {
-                return currentText
-            }
+            } else { return currentText }
         } else {
-            if isDisplayInt {
-                return formatDisplayText(of: processedText + tail)
-            }
-            else {
-                return currentText + tail
-            }
+            if isDisplayInt { return formatDisplayText(of: processedText + tail) }
+            else { return currentText + tail }
         }
     }
     
-    func formatDisplayText(of rawText: String) -> String {
-        
+    private func formatDisplayText(of rawText: String) -> String {
         let number = numberFormatter.number(from: rawText) ?? 0
         numberFormatter.positiveFormat = nil
         
         let processedText = (numberFormatter.string(for: number) ?? "0")
-
         var leadingZeroCount = 0
         for digit in processedText {
             if digit == "0" { leadingZeroCount += 1 }
@@ -202,7 +184,6 @@ class ViewController: UIViewController {
         }
         
         numberFormatter.maximumSignificantDigits = maxDisplayDigits - leadingZeroCount
-        
         if abs(number as! Double) >= pow(10.0, Double(maxDisplayDigits)) || ( abs(number as! Double) <= pow(0.1, Double(maxDisplayDigits-1)) && number != 0 )
         {
             numberFormatter.exponentSymbol = "e"
@@ -215,33 +196,31 @@ class ViewController: UIViewController {
         return (numberFormatter.string(for: number) ?? "0").replacingOccurrences(of:"+", with: "")
     }
     
-    var prevButton: UIButton? = nil
+    private var prevOperatorButton: UIButton? = nil
+    
     @IBAction func pressDualOperator(_ sender: UIButton) {
-        
-        prevButton?.isSelected = false
-        prevButton = sender
-        sender.isSelected = true
+        prevOperatorButton?.isSelected = false
+        prevOperatorButton = sender
         
         continuousEqual = false
-        if isBuffering {
-            performOperation()
-        }
+        if !isSelectingOperator && isBuffering { performOperation() }
+        
+        setPrevOperatorButton(to: true)
         
         let op = convertOperatorFrom(title: sender.title(for: .normal))
         calculator.assignOperator(with: op)
     }
-    
-    
-    var continuousEqual = false
+
+    private var continuousEqual = false
     @IBAction func pressEqualButton(_ sender: Any) {
+        setPrevOperatorButton(to: nil)
+        
         if !calculator.isOpNone() {
             performOperation()
             continuousEqual = true
         }
         
-        prevButton?.isSelected = false
-        
-        prevButton?.isSelected = false
+        isBuffering = false
     }
     
     private func performOperation() {
@@ -249,48 +228,44 @@ class ViewController: UIViewController {
             let rhs = (screenOutputLabel.text ?? "")
             calculator.assignRHS(with: rhs)
         }
-        isBuffering = false
         
         var disPlayText: String
-        if let result: Double = calculator.performTwoOperandsOperation() {
-            disPlayText = formatDisplayText(of: String(result))
-        } else {
-            disPlayText = "Error"
-        }
+        if let result: Double = calculator.performTwoOperandsOperation() { disPlayText = formatDisplayText(of: String(result)) }
+        else { disPlayText = "Error" }
         
         screenOutputLabel.text = disPlayText
+        isBuffering = false
     }
     
     @IBAction func pressSingleOperator(_ sender: UIButton) {
-        isBuffering = false
-        
         let value = (screenOutputLabel.text ?? "")
-        let op = convertOperatorFrom(title: sender.title(for: .normal))
+        if value == "Error" { return }
         
+        let op = convertOperatorFrom(title: sender.title(for: .normal))
         if op == .rev {
-            isBuffering = true
-            
-            let text :String = screenOutputLabel.text!
-            if text.count > 1 && text.first ?? " " == "-" {
-                let charIndex = text.index(text.startIndex, offsetBy: 1)
-                screenOutputLabel.text = String(text[charIndex...])
-            } else {
-                screenOutputLabel.text = "-"+text
-            }
+            if value.count > 1 && value.first ?? " " == "-" {
+                let charIndex = value.index(value.startIndex, offsetBy: 1)
+                screenOutputLabel.text = String(value[charIndex...])
+            } else { screenOutputLabel.text = "-"+value }
             return
         }
-        
+    
         var disPlayText: String
-        if let result: Double = calculator.performOneOperandOperation(on: value, with: op) {
-            disPlayText = formatDisplayText(of: String(result))
-        } else {
-            disPlayText = "Error"
-        }
+        if let result: Double = calculator.performOneOperandOperation(on: value, with: op) { disPlayText = formatDisplayText(of: String(result)) }
+        else { disPlayText = "Error" }
         
         screenOutputLabel.text = disPlayText
+        isBuffering = false
     }
     
-    
+    private func setPrevOperatorButton(to state: Any?) {
+        if state == nil {
+            prevOperatorButton?.isSelected = false
+            prevOperatorButton = nil
+        } else if state is Bool { prevOperatorButton?.isSelected = state as! Bool }
+        
+        isSelectingOperator = (state as? Bool) ?? false
+    }
     
     private func convertOperatorFrom(title op: String?) -> Calculator.CalOperator {
         switch op {
@@ -318,17 +293,6 @@ class ViewController: UIViewController {
             return .none
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 }
 
 extension UIButton {
